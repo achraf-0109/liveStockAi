@@ -5,6 +5,10 @@ const useAppStore = create((set) => ({
   currentView: 'home', // 'home', 'assistant', 'generating', 'report'
   setView: (view) => set({ currentView: view }),
 
+  // Language
+  language: 'darija', // 'en', 'darija', 'tamazight'
+  setLanguage: (lang) => set({ language: lang }),
+
   // User Inputs
   animalType: '',
   herdSize: '',

@@ -1,14 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Download, Share2, Droplets, Wheat, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { ArrowLeft, Download, Share2, Droplets, Wheat, Clock, TrendingUp, AlertTriangle, Volume2, Loader2, VolumeX } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import useAppStore from '../store/useAppStore';
 import { Button } from '../components/ui/Button';
+import { speakText, stopSpeaking } from '../services/aiService';
 
 const COLORS = ['#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ef4444'];
 
+const LANG_LABELS = {
+  en: { name: 'English', flag: '🇬🇧' },
+  darija: { name: 'الدارجة', flag: '🇲🇦' },
+  tamazight: { name: 'ⵜⴰⵎⴰⵣⵉⵖⵜ', flag: 'ⵣ' },
+};
+
 export default function Report() {
-  const { currentReport, setView } = useAppStore();
+  const { currentReport, setView, language } = useAppStore();
+  const [isPlaying, setIsPlaying] = React.useState(false);
 
   if (!currentReport) {
     return (
@@ -19,6 +27,43 @@ export default function Report() {
   }
 
   const { overview, dailyNeeds, nutritionalBreakdown, schedule, recommendations } = currentReport;
+
+  const handlePlayAudio = async () => {
+    if (isPlaying) {
+      stopSpeaking();
+      setIsPlaying(false);
+      return;
+    }
+
+    try {
+      setIsPlaying(true);
+
+      // Build the text to read from the report
+      const textParts = [
+        overview.summary,
+        `${dailyNeeds.water}. ${dailyNeeds.food}.`,
+      ];
+      
+      // Add schedule
+      schedule.forEach(item => {
+        textParts.push(`${item.time}: ${item.action}`);
+      });
+
+      // Add recommendations
+      textParts.push(recommendations.costSaving);
+      textParts.push(recommendations.healthWarnings);
+
+      const fullText = textParts.join('. ');
+      
+      await speakText(fullText, language);
+      setIsPlaying(false);
+    } catch (error) {
+      console.error("Failed to play audio:", error);
+      setIsPlaying(false);
+    }
+  };
+
+  const langInfo = LANG_LABELS[language] || LANG_LABELS.en;
 
   return (
     <motion.div
@@ -32,6 +77,23 @@ export default function Report() {
           <ArrowLeft className="w-4 h-4" /> Start Over
         </Button>
         <div className="flex gap-3">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 rounded-full text-sm font-medium text-slate-600">
+            <span>{langInfo.flag}</span>
+            <span>{langInfo.name}</span>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-2 bg-white"
+            onClick={handlePlayAudio}
+          >
+            {isPlaying ? (
+              <VolumeX className="w-4 h-4 text-red-500" />
+            ) : (
+              <Volume2 className="w-4 h-4" />
+            )}
+            {isPlaying ? 'Stop' : 'Listen 🔊'}
+          </Button>
           <Button variant="outline" size="sm" className="gap-2 bg-white">
             <Share2 className="w-4 h-4" /> Share
           </Button>
@@ -93,7 +155,7 @@ export default function Report() {
           {/* Chart */}
           <div className="glass-card rounded-3xl p-6">
             <h3 className="font-bold text-lg text-slate-800 mb-2">Nutritional Breakdown</h3>
-            <div className="h-64 w-full">
+            <div className="h-64 w-full" style={{ minWidth: 0 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie

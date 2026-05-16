@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Info, AlertCircle } from 'lucide-react';
+import { ArrowRight, Info, AlertCircle, Globe } from 'lucide-react';
 import useAppStore from '../store/useAppStore';
 import { Button } from '../components/ui/Button';
 
@@ -12,8 +12,14 @@ const animals = [
   { id: 'camel', name: 'Camel', icon: '🐪' },
 ];
 
+const languages = [
+  { id: 'en', name: 'English', flag: '🇬🇧' },
+  { id: 'darija', name: 'الدارجة', flag: '🇲🇦' },
+  { id: 'tamazight', name: 'ⵜⴰⵎⴰⵣⵉⵖⵜ', flag: 'ⵣ' },
+];
+
 export default function Dashboard() {
-  const { animalType, setAnimalType, herdSize, setHerdSize, setView } = useAppStore();
+  const { animalType, setAnimalType, herdSize, setHerdSize, setView, language, setLanguage } = useAppStore();
   const [error, setError] = useState('');
 
   const handleGenerate = () => {
@@ -50,6 +56,30 @@ export default function Dashboard() {
         transition={{ delay: 0.1 }}
         className="w-full glass-card rounded-3xl p-6 md:p-10"
       >
+        {/* Language Selection */}
+        <div className="mb-8">
+          <label className="block text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+            <Globe className="w-4 h-4 text-agricultural-sunset" />
+            Choose your language / اختار اللغة ديالك / ⵙⵜⵉ ⵜⵓⵜⵍⴰⵢⵜ
+          </label>
+          <div className="grid grid-cols-3 gap-3">
+            {languages.map((lang) => (
+              <button
+                key={lang.id}
+                onClick={() => setLanguage(lang.id)}
+                className={`flex items-center justify-center gap-2 p-3 rounded-2xl border-2 transition-all text-base font-medium ${
+                  language === lang.id
+                    ? 'border-agricultural-sunset bg-agricultural-sunset/10 shadow-md text-agricultural-sunset-dark'
+                    : 'border-slate-200 hover:border-agricultural-sunset/50 hover:bg-slate-50 text-slate-600'
+                }`}
+              >
+                <span className="text-xl">{lang.flag}</span>
+                <span>{lang.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Animal Selection */}
         <div className="mb-8">
           <label className="block text-sm font-semibold text-slate-700 mb-3">

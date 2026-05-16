@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Activity, CloudOff, PiggyBank, FileText } from 'lucide-react';
+import { ArrowRight, Activity, CloudOff, PiggyBank, FileText, MousePointer2, BrainCircuit, ClipboardCheck } from 'lucide-react';
 import useAppStore from '../store/useAppStore';
 import { Button } from '../components/ui/Button';
 import farmBackground from './resources/farmgreen.png';
@@ -20,12 +20,13 @@ export default function Home() {
   const isMobile = windowWidth < 768;
 
   const getCardAnimation = (index) => {
+    const pos = (index - topCardIndex + 3) % 3;
     if (!isExpanded) {
       // Stacked
-      const pos = (index - topCardIndex + 3) % 3;
       return {
         x: (pos - 1) * 35,
         y: 0,
+        rotate: pos === 0 ? 0 : (pos === 1 ? -6 : 6),
         scale: 1 - (pos * 0.05),
         zIndex: 30 - pos * 10,
         opacity: 1,
@@ -36,16 +37,18 @@ export default function Home() {
         return {
           x: 0,
           y: (index - 1) * 320,
+          rotate: 0,
           scale: 1,
-          zIndex: 30 - index * 10,
+          zIndex: 30 - pos * 10,
           opacity: 1,
         };
       } else {
         return {
           x: (index - 1) * 340,
           y: 0,
+          rotate: 0,
           scale: 1,
-          zIndex: 30 - index * 10,
+          zIndex: 30 - pos * 10,
           opacity: 1,
         };
       }
@@ -53,9 +56,9 @@ export default function Home() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-[#f4f7ed]">
       {/* Full-bleed Hero Section */}
-      <section 
+      <section
         className="relative w-full py-32 px-4 sm:px-6 flex flex-col items-center justify-center mb-20"
         style={{
           backgroundImage: `url(${farmBackground})`,
@@ -64,7 +67,7 @@ export default function Home() {
         }}
       >
         {/* Semi-transparent overlay to ensure text contrast */}
-        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-agricultural-wheat"></div>
         
         <motion.div
@@ -72,10 +75,7 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="relative z-10 text-center max-w-4xl mx-auto"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 shadow-sm text-agricultural-green-dark text-sm font-semibold mb-6 border border-agricultural-green/20">
-            <span className="w-2 h-2 rounded-full bg-agricultural-green animate-pulse"></span>
-            Livestock Nutrition, Reimagined
-          </div>
+          
           <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 mb-6 tracking-tight drop-shadow-md">
             Feed Smarter, <br />
             <span className="text-agricultural-green">Farm Better.</span>
@@ -115,22 +115,35 @@ export default function Home() {
           }}
         >
           {[
-            { step: '1', title: 'Select Animal', desc: 'Choose your livestock type and enter the number of animals in your herd.' },
-            { step: '2', title: 'AI Analysis', desc: 'Our veterinary-trained AI instantly calculates macronutrient and water needs.' },
-            { step: '3', title: 'Get Report', desc: 'Receive an actionable plan with feeding schedules and cost-saving tips.' }
+            { step: 'Step 1', title: 'Select Animal', desc: 'Choose your livestock type and enter the number of animals in your herd.', icon: <MousePointer2 />, color: 'from-blue-500 to-cyan-400', shadow: 'shadow-blue-500/30' },
+            { step: 'Step 2', title: 'AI Analysis', desc: 'Our veterinary-trained AI instantly calculates macronutrient and water needs.', icon: <BrainCircuit />, color: 'from-purple-500 to-fuchsia-400', shadow: 'shadow-purple-500/30' },
+            { step: 'Step 3', title: 'Get Report', desc: 'Receive an actionable plan with feeding schedules and cost-saving tips.', icon: <ClipboardCheck />, color: 'from-emerald-500 to-teal-400', shadow: 'shadow-emerald-500/30' }
           ].map((item, i) => (
             <motion.div
               initial={{ opacity: 0 }}
               animate={getCardAnimation(i)}
               transition={{ duration: 0.4, ease: "easeInOut" }}
               key={item.step}
-              className="absolute w-[280px] sm:w-[320px] glass-card p-8 rounded-3xl text-center shadow-2xl border border-white/50 bg-white/90 backdrop-blur-md"
+              className="absolute w-[280px] sm:w-[320px] p-8 rounded-[2.5rem] text-center shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.12)] transition-shadow duration-300 border border-white/80 bg-white/95 backdrop-blur-sm overflow-hidden group"
             >
-              <div className="w-12 h-12 bg-agricultural-green text-white rounded-2xl flex items-center justify-center text-xl font-bold mx-auto mb-6 shadow-glow">
+              {/* Decorative Watermark Icon */}
+              <div className="absolute -right-8 -bottom-8 opacity-[0.03] text-slate-900 pointer-events-none transform group-hover:scale-110 transition-transform duration-500">
+                {React.cloneElement(item.icon, { className: "w-56 h-56" })}
+              </div>
+
+              {/* Step Badge */}
+              <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-slate-100 text-slate-500 text-sm font-bold mb-6 tracking-wide uppercase">
                 {item.step}
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-3">{item.title}</h3>
-              <p className="text-slate-600 leading-relaxed">{item.desc}</p>
+
+              {/* Icon Box */}
+              <div className={`w-20 h-20 bg-gradient-to-br ${item.color} text-white rounded-[1.5rem] flex items-center justify-center mx-auto mb-8 shadow-xl ${item.shadow} relative overflow-hidden transform group-hover:-translate-y-1 transition-transform duration-300`}>
+                <div className="absolute inset-0 bg-white/20 translate-y-[-50%] rotate-45 transform origin-top-left"></div>
+                {React.cloneElement(item.icon, { className: "w-10 h-10 relative z-10" })}
+              </div>
+              
+              <h3 className="text-2xl font-extrabold text-slate-900 mb-4 tracking-tight">{item.title}</h3>
+              <p className="text-slate-600 font-medium leading-relaxed relative z-10">{item.desc}</p>
             </motion.div>
           ))}
         </div>

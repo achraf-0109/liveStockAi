@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sprout, Droplets, Wheat, BrainCircuit } from 'lucide-react';
 import useAppStore from '../store/useAppStore';
-import { generateMockReport } from '../services/mockAiService';
+import { generateReportFromGroq } from '../services/aiService';
 
 const loadingSteps = [
   { icon: <BrainCircuit className="w-8 h-8 text-agricultural-green" />, text: "AI analyzing animal profile..." },
@@ -12,7 +12,7 @@ const loadingSteps = [
 ];
 
 export default function Generating() {
-  const { animalType, herdSize, setCurrentReport, setView } = useAppStore();
+  const { animalType, herdSize, language, setCurrentReport, setView } = useAppStore();
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
@@ -24,11 +24,12 @@ export default function Generating() {
     // AI Generation logic
     const fetchReport = async () => {
       try {
-        const report = await generateMockReport(animalType, herdSize);
+        const report = await generateReportFromGroq(animalType, herdSize, language);
         setCurrentReport(report);
         setView('report');
       } catch (error) {
         console.error("Failed to generate report", error);
+        alert("Failed to generate report. Check console for details (did you add your Groq API key?).");
         setView('assistant'); // fallback on error
       }
     };
@@ -36,7 +37,7 @@ export default function Generating() {
     fetchReport();
 
     return () => clearInterval(stepInterval);
-  }, [animalType, herdSize, setCurrentReport, setView]);
+  }, [animalType, herdSize, language, setCurrentReport, setView]);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center py-20">
