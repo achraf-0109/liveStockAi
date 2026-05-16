@@ -5,6 +5,8 @@ import useAppStore from '../store/useAppStore';
 import { Button } from '../components/ui/Button';
 import farmBackground from './resources/farmgreen.png';
 
+import feediaLogo from './resources/feedia_logo.png';
+
 export default function Home() {
   const setView = useAppStore((state) => state.setView);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -59,29 +61,53 @@ export default function Home() {
     <div className="w-full bg-[#f4f7ed]">
       {/* Full-bleed Hero Section */}
       <section
-        className="relative w-full py-32 px-4 sm:px-6 flex flex-col items-center justify-center mb-20"
+        className="relative w-full py-40 px-4 sm:px-6 flex flex-col items-center justify-center mb-20 overflow-hidden"
         style={{
           backgroundImage: `url(${farmBackground})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
+        {/* Navigation Bar */}
+        <nav className="absolute top-0 left-0 w-full z-20 px-6 py-8 flex items-center justify-center max-w-7xl mx-auto left-1/2 -translate-x-1/2">
+          <div className="flex items-center gap-10 bg-white/20 backdrop-blur-xl px-8 py-3 rounded-full border border-white/30 shadow-2xl">
+            <a href="#" className="text-slate-900 font-bold text-sm tracking-widest uppercase hover:text-agricultural-green transition-all hover:scale-110">Home</a>
+            <a href="#" className="text-slate-900 font-bold text-sm tracking-widest uppercase hover:text-agricultural-green transition-all hover:scale-110">Features</a>
+            <a href="#" className="text-slate-900 font-bold text-sm tracking-widest uppercase hover:text-agricultural-green transition-all hover:scale-110">Solutions</a>
+            <a href="#" className="text-slate-900 font-bold text-sm tracking-widest uppercase hover:text-agricultural-green transition-all hover:scale-110">Contact</a>
+          </div>
+        </nav>
+
         {/* Semi-transparent overlay to ensure text contrast */}
-        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-agricultural-wheat"></div>
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-agricultural-wheat/30"></div>
         
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
           className="relative z-10 text-center max-w-4xl mx-auto"
         >
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="mb-8"
+          >
+            <img 
+              src={feediaLogo} 
+              alt="Feedia Logo" 
+              className="h-32 md:h-48 mx-auto drop-shadow-[0_15px_15px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform duration-300"
+            />
+          </motion.div>
           
-          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 mb-6 tracking-tight drop-shadow-md">
+          <h1 className="text-6xl md:text-8xl font-extrabold text-slate-900 mb-8 tracking-tight drop-shadow-xl leading-tight">
             Feed Smarter, <br />
-            <span className="text-agricultural-green">Farm Better.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-agricultural-green to-emerald-600">Farm Better.</span>
           </h1>
-          <p className="text-xl md:text-2xl text-slate-800 max-w-2xl mx-auto mb-10 font-medium drop-shadow-sm">
-            The simplest way for farmers to calculate precise nutritional needs, optimize feeding schedules, and save on feed costs using advanced AI.
+          <p className="text-xl md:text-2xl text-slate-800 max-w-2xl mx-auto mb-12 font-medium leading-relaxed drop-shadow-sm">
+            Empowering modern farmers with AI-driven nutrition strategies and precise feeding optimization for maximum livestock productivity.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button size="lg" onClick={() => setView('assistant')} className="group text-lg shadow-emerald-500/40 shadow-xl px-8 border border-white/20">

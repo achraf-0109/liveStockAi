@@ -12,6 +12,7 @@ load_dotenv("../.env")
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 
 app = FastAPI(title="LivestockAI Backend API")
@@ -32,7 +33,18 @@ retriever = db.as_retriever(search_kwargs={"k": 3})
 
 # Initialize LLM
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2) if GOOGLE_API_KEY else None
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+
+# Prefer Groq if available, fallback to Gemini
+if GROQ_API_KEY:
+    print("Using Groq (Llama-3.3) for AI generation...")
+    llm = ChatGroq(model="llama-3.3-70b-specdec", temperature=0.2, groq_api_key=GROQ_API_KEY)
+elif GOOGLE_API_KEY:
+    print("Using Google (Gemini) for AI generation...")
+    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.2)
+else:
+    print("Warning: No LLM API Key found!")
+    llm = None
 
 class ReportRequest(BaseModel):
     animalType: str
