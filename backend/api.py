@@ -38,7 +38,7 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 # Prefer Groq if available, fallback to Gemini
 if GROQ_API_KEY:
     print("Using Groq (Llama-3.3) for AI generation...")
-    llm = ChatGroq(model="llama-3.3-70b-specdec", temperature=0.2, groq_api_key=GROQ_API_KEY)
+    llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.2, groq_api_key=GROQ_API_KEY)
 elif GOOGLE_API_KEY:
     print("Using Google (Gemini) for AI generation...")
     llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.2)
@@ -57,7 +57,7 @@ class ChatRequest(BaseModel):
 @app.post("/api/generate-report")
 async def generate_report(request: ReportRequest):
     if not llm:
-        raise HTTPException(status_code=500, detail="Google API Key missing.")
+        raise HTTPException(status_code=500, detail="Groq API Key missing.")
 
     # 1. Use the vector database to find context about this animal
     query_str = f"nutrition hydration schedule recommendations for {request.animalType} livestock"
@@ -89,7 +89,7 @@ async def generate_report(request: ReportRequest):
     Use the context above to inform your recommendations. 
     Please provide the response ONLY as a valid JSON object with the exact following structure, no markdown formatting or extra text:
     {{
-      "overview": {{
+    "overview": {{
         "animal": "animal name",
         "size": number,
         "summary": "1 sentence summary based on context"
@@ -129,23 +129,28 @@ async def generate_report(request: ReportRequest):
     try:
         response = llm.invoke(messages)
         
-        # Clean up Markdown formatting (if Gemini wrapped it in ```json)
-        raw_json = response.content.strip()
-        if raw_json.startswith("```json"):
-            raw_json = raw_json[7:]
-        if raw_json.endswith("```"):
-            raw_json = raw_json[:-3]
+        # Robust JSON extraction
+        raw_content = response.content.strip()
+        
+        import re
+        # Find the first { and the last }
+        match = re.search(r'\{.*\}', raw_content, re.DOTALL)
+        if match:
+            json_str = match.group(0)
+            parsed_json = json.loads(json_str)
+            return parsed_json
+        else:
+            raise ValueError("No valid JSON object found in response.")
             
-        parsed_json = json.loads(raw_json.strip())
-        return parsed_json
     except Exception as e:
         print(f"Error generating report: {str(e)}")
+        print(f"Raw response was: {response.content if 'response' in locals() else 'None'}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
     if not llm:
-        raise HTTPException(status_code=500, detail="Google API Key missing.")
+        raise HTTPException(status_code=500, detail="Groq API Key missing.")
 
     docs = retriever.invoke(request.query)
     context = "\n\n".join(d.page_content for d in docs)

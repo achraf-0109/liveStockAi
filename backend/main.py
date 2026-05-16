@@ -1,8 +1,7 @@
 import os
 import warnings
 from langchain_community.vectorstores import Chroma
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_groq import ChatGroq
 from dotenv import load_dotenv
 
 warnings.filterwarnings("ignore")
@@ -20,12 +19,12 @@ def main():
     db = Chroma(persist_directory="./chroma_db_pdf", embedding_function=embeddings)
     retriever = db.as_retriever(search_kwargs={"k": 3})
     
-    if not os.environ.get("GOOGLE_API_KEY"):
-        print("ERROR: GOOGLE_API_KEY is required for the Gemini LLM. Please add it to a .env file.")
-        print("Format of .env file: GOOGLE_API_KEY=your_api_key_here")
+    if not os.environ.get("GROQ_API_KEY"):
+        print("ERROR: GROQ_API_KEY is required for the Llama-3.3 LLM. Please add it to a .env file.")
+        print("Format of .env file: GROQ_API_KEY=your_api_key_here")
         return
         
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2)
+    llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.2)
     
     def ask_question(query_dict):
         q = query_dict["query"]
