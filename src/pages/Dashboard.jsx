@@ -36,7 +36,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center py-10 w-full max-w-3xl mx-auto">
+    <div className="flex-1 flex flex-col items-center justify-center py-10 px-4 sm:px-6 w-full max-w-3xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -62,7 +62,7 @@ export default function Dashboard() {
             <Globe className="w-4 h-4 text-agricultural-sunset" />
             Choose your language / اختار اللغة ديالك / ⵙⵜⵉ ⵜⵓⵜⵍⴰⵢⵜ
           </label>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {languages.map((lang) => (
               <button
                 key={lang.id}

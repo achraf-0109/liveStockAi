@@ -7,11 +7,49 @@ import farmBackground from './resources/farmgreen.png';
 
 import feediaLogo from './resources/feedia_logo.png';
 
+const HERO_CONTENT = [
+  {
+    id: 'en',
+    dir: 'ltr',
+    title1: 'Feed Smarter,',
+    title2: 'Farm Better.',
+    subtitle: 'Empowering modern farmers with AI-driven nutrition strategies and precise feeding optimization for maximum livestock productivity.',
+    btnPrimary: 'Launch AI Assistant',
+    btnSecondary: 'View Example Report'
+  },
+  {
+    id: 'ar',
+    dir: 'rtl',
+    title1: 'علّف بذكاء،',
+    title2: 'ربّي أحسن.',
+    subtitle: 'تمكين الفلاحة بطرق التغذية بالذكاء الاصطناعي لتحقيق أعلى إنتاجية للماشية.',
+    btnPrimary: 'ابدأ المساعد الذكي',
+    btnSecondary: 'شوف مثال تقرير'
+  },
+  {
+    id: 'tz',
+    dir: 'ltr',
+    title1: 'ⵙⵙⵛⵜⴰ ⵙ ⵓⵏⴳⴰⵍ,',
+    title2: 'ⴽⵔⵣ ⵓⴳⴰⵔ.',
+    subtitle: 'ⴰⵙⵉⵣⴷⴳ ⵏ ⵉⵎⴽⵔⴰⵣⵏ ⵙ ⵜⵙⵔⵜⵉⵜⵉⵏ ⵏ ⵓⵙⵎⴳⴰⵍ ⵙ ⵜⵉⵏⵡⵉⵜ ⵏ ⵜⵓⵙⵙⵏⴰ ⵉ ⵓⴼⴰⵔⵙ ⴰⵎⴰⵜⵜⵓⵢ ⵏ ⵉⵎⵓⴷⴰⵔ.',
+    btnPrimary: 'ⵙⴽⵔ ⴰⵎⵙⵉⵡⵙ',
+    btnSecondary: 'ⵥⵕ ⴰⵎⴷⵢⴰ'
+  }
+];
+
 export default function Home() {
   const setView = useAppStore((state) => state.setView);
   const [isExpanded, setIsExpanded] = useState(false);
   const [topCardIndex, setTopCardIndex] = useState(0);
+  const [currentLangIndex, setCurrentLangIndex] = useState(0);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentLangIndex((prev) => (prev + 1) % HERO_CONTENT.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -68,8 +106,8 @@ export default function Home() {
           backgroundPosition: 'center',
         }}
       >
-        {/* Navigation Bar */}
-        <nav className="absolute top-0 left-0 w-full z-20 px-6 py-8 flex items-center justify-center max-w-7xl mx-auto left-1/2 -translate-x-1/2">
+        {/* Navigation Bar (Hidden on Mobile, replaced by Bottom Nav) */}
+        <nav className="absolute top-0 left-0 w-full z-20 px-6 py-8 hidden md:flex items-center justify-center max-w-7xl mx-auto left-1/2 -translate-x-1/2">
           <div className="flex items-center gap-10 bg-white/20 backdrop-blur-xl px-8 py-3 rounded-full border border-white/30 shadow-2xl">
             <a href="#" className="text-slate-900 font-bold text-sm tracking-widest uppercase hover:text-agricultural-green transition-all hover:scale-110">Home</a>
             <a href="#" className="text-slate-900 font-bold text-sm tracking-widest uppercase hover:text-agricultural-green transition-all hover:scale-110">Features</a>
@@ -102,21 +140,37 @@ export default function Home() {
             />
           </motion.div>
           
-          <h1 className="text-6xl md:text-8xl font-extrabold text-slate-900 mb-8 tracking-tight drop-shadow-xl leading-tight">
-            Feed Smarter, <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-agricultural-green to-emerald-600">Farm Better.</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-slate-800 max-w-2xl mx-auto mb-12 font-medium leading-relaxed drop-shadow-sm">
-            Empowering modern farmers with AI-driven nutrition strategies and precise feeding optimization for maximum livestock productivity.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" onClick={() => setView('assistant')} className="group text-lg shadow-emerald-500/40 shadow-xl px-8 border border-white/20">
-              Launch AI Assistant
-              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 bg-white/90 backdrop-blur-md border-2 border-slate-300 hover:border-agricultural-green hover:bg-white shadow-lg">
-              View Example Report
-            </Button>
+          <div className="relative w-full flex flex-col items-center justify-start min-h-[450px] sm:min-h-[300px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentLangIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="w-full flex flex-col items-center"
+                dir={HERO_CONTENT[currentLangIndex].dir}
+              >
+                <h1 className="text-5xl md:text-8xl font-extrabold text-slate-900 mb-6 md:mb-8 tracking-tight drop-shadow-xl leading-tight">
+                  {HERO_CONTENT[currentLangIndex].title1} <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-agricultural-green to-emerald-600">
+                    {HERO_CONTENT[currentLangIndex].title2}
+                  </span>
+                </h1>
+                <p className="text-lg md:text-2xl text-slate-800 max-w-2xl mx-auto mb-10 md:mb-12 font-medium leading-relaxed drop-shadow-sm px-4">
+                  {HERO_CONTENT[currentLangIndex].subtitle}
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                  <Button size="lg" onClick={() => setView('assistant')} className="group text-lg shadow-emerald-500/40 shadow-xl px-8 border border-white/20 w-full sm:w-auto">
+                    {HERO_CONTENT[currentLangIndex].btnPrimary}
+                    <ArrowRight className={`w-5 h-5 transition-transform ${HERO_CONTENT[currentLangIndex].dir === 'rtl' ? 'mr-2 rotate-180 group-hover:-translate-x-1' : 'ml-2 group-hover:translate-x-1'}`} />
+                  </Button>
+                  <Button variant="outline" size="lg" className="text-lg px-8 bg-white/90 backdrop-blur-md border-2 border-slate-300 hover:border-agricultural-green hover:bg-white shadow-lg w-full sm:w-auto">
+                    {HERO_CONTENT[currentLangIndex].btnSecondary}
+                  </Button>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </motion.div>
       </section>
@@ -179,7 +233,7 @@ export default function Home() {
       <section className="w-full glass-card p-10 md:p-16 rounded-[2.5rem] bg-gradient-to-br from-white to-agricultural-green/5 border-agricultural-green/20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Why Farmers Trust LivestockAI</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Why Farmers Trust Feedia</h2>
             <p className="text-lg text-slate-600 mb-8">
               Built for rural environments, our platform focuses on simplicity, accessibility, and real-world agricultural efficiency.
             </p>

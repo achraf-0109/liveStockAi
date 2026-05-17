@@ -7,7 +7,7 @@ import { Button } from '../components/ui/Button';
 import { speakText, stopSpeaking } from '../services/aiService';
 import { translations } from '../utils/translations';
 
-const COLORS = ['#10b981', '#f59e0b', '#3b82f6', '#8b5cf6', '#ef4444'];
+const COLORS = ['#059669', '#d97706', '#0284c7', '#ea580c', '#65a30d']; // Forest Green, Amber, Sky Blue, Rust Orange, Leaf Green
 
 const LANG_LABELS = {
   en: { name: 'English', flag: '🇬🇧' },
@@ -32,31 +32,16 @@ export default function Report() {
 
   const { overview, dailyNeeds, nutritionalBreakdown, schedule, recommendations } = currentReport;
 
-  const handlePlayAudio = async () => {
-    if (isPlaying) {
-      stopSpeaking();
-      setIsPlaying(false);
-      return;
-    }
-
+  const playReportAudio = async () => {
     try {
       setIsPlaying(true);
-
-      // Build the text to read from the report
       const textParts = [
         overview.summary,
         `${dailyNeeds.water}. ${dailyNeeds.food}.`,
       ];
-      
-      // Add schedule
-      schedule.forEach(item => {
-        textParts.push(`${item.time}: ${item.action}`);
-      });
-
-      // Add recommendations
+      schedule.forEach(item => textParts.push(`${item.time}: ${item.action}`));
       textParts.push(recommendations.costSaving);
       textParts.push(recommendations.healthWarnings);
-
       const fullText = textParts.join('. ');
       
       await speakText(fullText, language);
@@ -67,21 +52,41 @@ export default function Report() {
     }
   };
 
+  React.useEffect(() => {
+    // Stop any ongoing speech when component mounts or updates
+    stopSpeaking();
+    // Auto-play the new report
+    playReportAudio();
+
+    return () => {
+      stopSpeaking();
+    };
+  }, [currentReport, language]);
+
+  const handlePlayAudio = () => {
+    if (isPlaying) {
+      stopSpeaking();
+      setIsPlaying(false);
+    } else {
+      playReportAudio();
+    }
+  };
+
   const langInfo = LANG_LABELS[language] || LANG_LABELS.en;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-5xl mx-auto w-full pb-10"
+      className="max-w-5xl mx-auto w-full px-4 sm:px-6 pb-10"
       dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Header Actions */}
-      <div className="flex items-center justify-between mb-8" dir="ltr">
-        <Button variant="ghost" size="sm" onClick={() => setView('assistant')} className="gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8" dir="ltr">
+        <Button variant="ghost" size="sm" onClick={() => setView('assistant')} className="gap-2 shrink-0">
           <ArrowLeft className="w-4 h-4" /> {t.startOver}
         </Button>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3 w-full sm:w-auto justify-start sm:justify-end">
           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 rounded-full text-sm font-medium text-slate-600">
             <span>{langInfo.flag}</span>
             <span>{langInfo.name}</span>
@@ -108,23 +113,38 @@ export default function Report() {
         </div>
       </div>
 
-      {/* Main Overview Card */}
-      <div className="glass-card rounded-3xl p-6 md:p-8 mb-8 bg-gradient-to-br from-white to-agricultural-green-light/30 border-agricultural-green/20">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2 capitalize">
+      {/* Premium Hero Section */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative overflow-hidden rounded-3xl p-8 md:p-12 mb-10 bg-gradient-to-br from-agricultural-green-dark to-agricultural-green shadow-xl border border-white/10"
+      >
+        {/* Subtle background texture/pattern */}
+        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="max-w-2xl">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 capitalize drop-shadow-sm">
               {isRtl ? `${t.nutritionReport} ${overview.animal}` : `${overview.animal} ${t.nutritionReport}`}
             </h1>
-            <p className="text-lg text-slate-600">{overview.summary}</p>
+            <p className="text-lg text-emerald-50 leading-relaxed font-medium">
+              {overview.summary}
+            </p>
           </div>
-          <div className="bg-white/80 px-4 py-2 rounded-xl inline-flex items-center gap-2 border border-slate-200">
-            <span className="text-sm font-semibold text-slate-500 uppercase tracking-wide">{t.herdSize}:</span>
-            <span className="text-2xl font-bold text-agricultural-green-dark">{overview.size}</span>
+          <div className="bg-white/10 backdrop-blur-md px-6 py-4 rounded-2xl inline-flex flex-col items-center border border-white/20 shadow-inner">
+            <span className="text-sm font-semibold text-emerald-100 uppercase tracking-widest mb-1">{t.herdSize}</span>
+            <span className="text-4xl font-black text-white">{overview.size}</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+      >
         
         {/* Left Column: Metrics & Chart */}
         <div className="lg:col-span-1 space-y-8">
@@ -199,52 +219,70 @@ export default function Report() {
         <div className="lg:col-span-2 space-y-8">
           
           {/* Schedule */}
-          <div className="glass-card rounded-3xl p-6">
-            <h3 className="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-agricultural-sunset" /> {t.feedingSchedule}
+          <div className="glass-card rounded-3xl p-6 md:p-8 shadow-sm">
+            <h3 className="font-bold text-xl text-slate-800 mb-8 flex items-center gap-3">
+              <Clock className="w-6 h-6 text-agricultural-sunset" /> {t.feedingSchedule}
             </h3>
-            <div className="relative border-l-2 border-slate-100 ml-3 space-y-8">
+            <div className="relative border-s-2 border-agricultural-sunset/30 ms-4 space-y-8">
               {schedule.map((item, index) => (
-                <div key={index} className="relative pl-6">
-                  <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-4 border-agricultural-sunset"></div>
-                  <div className="font-bold text-slate-900 mb-1">{item.time}</div>
-                  <div className="text-slate-600 bg-slate-50/50 p-3 rounded-xl border border-slate-100 mt-2">
+                <motion.div 
+                  initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + (index * 0.1) }}
+                  key={index} 
+                  className="relative ps-8 group"
+                >
+                  <div className="absolute -start-[11px] top-1 w-5 h-5 rounded-full bg-white border-4 border-agricultural-sunset shadow-sm group-hover:scale-110 transition-transform"></div>
+                  <div className="font-extrabold text-slate-900 text-lg mb-2">{item.time}</div>
+                  <div className="text-slate-600 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm shadow-slate-200/50 group-hover:border-agricultural-sunset/30 transition-colors">
                     {item.action}
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
 
           {/* Recommendations Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="glass-card bg-emerald-50/50 rounded-3xl p-5 border-emerald-100">
-              <h4 className="font-bold text-emerald-800 mb-2">{t.costSavings}</h4>
-              <p className="text-sm text-emerald-700 leading-relaxed">{recommendations.costSaving}</p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div 
+              whileHover={{ y: -2 }}
+              className="bg-white rounded-2xl p-6 shadow-sm shadow-slate-200/50 border border-slate-100 border-s-4 border-s-emerald-500"
+            >
+              <h4 className="font-bold text-slate-800 mb-3 text-lg">{t.costSavings}</h4>
+              <p className="text-sm text-slate-600 leading-relaxed font-medium">{recommendations.costSaving}</p>
+            </motion.div>
             
-            <div className="glass-card bg-amber-50/50 rounded-3xl p-5 border-amber-100">
-              <h4 className="font-bold text-amber-800 mb-2 flex items-center gap-2">
+            <motion.div 
+              whileHover={{ y: -2 }}
+              className="bg-white rounded-2xl p-6 shadow-sm shadow-slate-200/50 border border-slate-100 border-s-4 border-s-amber-500"
+            >
+              <h4 className="font-bold text-slate-800 mb-3 text-lg flex items-center gap-2">
                  {t.productivity}
               </h4>
-              <p className="text-sm text-amber-700 leading-relaxed">{recommendations.productivity}</p>
-            </div>
+              <p className="text-sm text-slate-600 leading-relaxed font-medium">{recommendations.productivity}</p>
+            </motion.div>
 
-            <div className="glass-card bg-blue-50/50 rounded-3xl p-5 border-blue-100">
-              <h4 className="font-bold text-blue-800 mb-2">{t.localAlternatives}</h4>
-              <p className="text-sm text-blue-700 leading-relaxed">{recommendations.localFood}</p>
-            </div>
+            <motion.div 
+              whileHover={{ y: -2 }}
+              className="bg-white rounded-2xl p-6 shadow-sm shadow-slate-200/50 border border-slate-100 border-s-4 border-s-blue-500"
+            >
+              <h4 className="font-bold text-slate-800 mb-3 text-lg">{t.localAlternatives}</h4>
+              <p className="text-sm text-slate-600 leading-relaxed font-medium">{recommendations.localFood}</p>
+            </motion.div>
 
-            <div className="glass-card bg-red-50/50 rounded-3xl p-5 border-red-100">
-              <h4 className="font-bold text-red-800 mb-2 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4" /> {t.healthWarnings}
+            <motion.div 
+              whileHover={{ y: -2 }}
+              className="bg-white rounded-2xl p-6 shadow-sm shadow-slate-200/50 border border-slate-100 border-s-4 border-s-red-500"
+            >
+              <h4 className="font-bold text-slate-800 mb-3 text-lg flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500" /> {t.healthWarnings}
               </h4>
-              <p className="text-sm text-red-700 leading-relaxed">{recommendations.healthWarnings}</p>
-            </div>
+              <p className="text-sm text-slate-600 leading-relaxed font-medium">{recommendations.healthWarnings}</p>
+            </motion.div>
           </div>
           
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

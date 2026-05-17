@@ -11,6 +11,14 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/hf-api/, ''),
       },
+      '/google-tts': {
+        target: 'https://translate.google.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/google-tts/, ''),
+        headers: {
+          'Referer': 'https://translate.google.com/'
+        }
+      },
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
