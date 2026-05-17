@@ -47,7 +47,7 @@ export default function Home() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentLangIndex((prev) => (prev + 1) % HERO_CONTENT.length);
-    }, 4000);
+    }, 600);
     return () => clearInterval(timer);
   }, []);
 
@@ -116,7 +116,7 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* Semi-transparent overlay to ensure text contrast */}
+        {/* Semi-transparent overlays to ensure text contrast */}
         <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-agricultural-wheat/30"></div>
         
@@ -124,53 +124,59 @@ export default function Home() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="relative z-10 text-center max-w-4xl mx-auto"
+          className="relative z-10 text-center max-w-4xl mx-auto w-full flex flex-col items-center"
         >
-          {/* Logo */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="mb-8"
-          >
+          {/* Logo & Localized Glow Badge */}
+          <div className="mb-8 flex flex-col items-center">
             <img 
               src={feediaLogo} 
               alt="Feedia Logo" 
-              className="h-32 md:h-48 mx-auto drop-shadow-[0_15px_15px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform duration-300"
+              className="h-32 md:h-48 mx-auto drop-shadow-[0_15px_15px_rgba(0,0,0,0.3)] hover:scale-105 transition-transform duration-300 mb-6"
             />
-          </motion.div>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-agricultural-green/15 text-agricultural-green border border-agricultural-green/20 text-xs md:text-sm font-black tracking-wider uppercase backdrop-blur-md shadow-sm">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-agricultural-green opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-agricultural-green"></span>
+              </span>
+              {currentLangIndex === 0 && "Morocco's AI Livestock Hub"}
+              {currentLangIndex === 1 && "محرك التغذية الذكي للمغرب"}
+              {currentLangIndex === 2 && "ⴰⵙⵎⴳⴰⵍ ⵏ ⵓⵙⵙⵛⵜⴰ ⵉ ⵍⵎⵖⵔⵉⴱ"}
+            </div>
+          </div>
           
-          <div className="relative w-full flex flex-col items-center justify-start min-h-[450px] sm:min-h-[300px]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentLangIndex}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="w-full flex flex-col items-center"
+          {/* Text Container with Carousel (Fully relative to prevent overlap) */}
+          <div className="w-full flex flex-col items-center justify-start min-h-[320px] sm:min-h-[220px] md:min-h-[260px] relative">
+            <motion.div
+              key={currentLangIndex}
+              initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="w-full flex flex-col items-center text-center"
+            >
+              <h1 className="text-5xl md:text-8xl font-black text-slate-900 mb-6 md:mb-8 tracking-tight drop-shadow-xl leading-tight">
+                {HERO_CONTENT[currentLangIndex].title1} <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-agricultural-green via-emerald-600 to-teal-500 font-extrabold">
+                  {HERO_CONTENT[currentLangIndex].title2}
+                </span>
+              </h1>
+              <p 
+                className="text-lg md:text-2xl text-slate-800 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-sm px-4"
                 dir={HERO_CONTENT[currentLangIndex].dir}
               >
-                <h1 className="text-5xl md:text-8xl font-extrabold text-slate-900 mb-6 md:mb-8 tracking-tight drop-shadow-xl leading-tight">
-                  {HERO_CONTENT[currentLangIndex].title1} <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-agricultural-green to-emerald-600">
-                    {HERO_CONTENT[currentLangIndex].title2}
-                  </span>
-                </h1>
-                <p className="text-lg md:text-2xl text-slate-800 max-w-2xl mx-auto mb-10 md:mb-12 font-medium leading-relaxed drop-shadow-sm px-4">
-                  {HERO_CONTENT[currentLangIndex].subtitle}
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-                  <Button size="lg" onClick={() => setView('assistant')} className="group text-lg shadow-emerald-500/40 shadow-xl px-8 border border-white/20 w-full sm:w-auto">
-                    {HERO_CONTENT[currentLangIndex].btnPrimary}
-                    <ArrowRight className={`w-5 h-5 transition-transform ${HERO_CONTENT[currentLangIndex].dir === 'rtl' ? 'mr-2 rotate-180 group-hover:-translate-x-1' : 'ml-2 group-hover:translate-x-1'}`} />
-                  </Button>
-                  <Button variant="outline" size="lg" className="text-lg px-8 bg-white/90 backdrop-blur-md border-2 border-slate-300 hover:border-agricultural-green hover:bg-white shadow-lg w-full sm:w-auto">
-                    {HERO_CONTENT[currentLangIndex].btnSecondary}
-                  </Button>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                {HERO_CONTENT[currentLangIndex].subtitle}
+              </p>
+            </motion.div>
+          </div>
+
+          {/* Static Buttons (Highly Stylized, Lift Transform, and Glow Shadow) */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full mt-10 relative z-20" dir={HERO_CONTENT[currentLangIndex].dir}>
+            <Button size="lg" onClick={() => setView('assistant')} className="group text-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 shadow-2xl px-8 border border-white/20 w-full sm:w-auto transition-all duration-300 transform hover:-translate-y-0.5">
+              {HERO_CONTENT[currentLangIndex].btnPrimary}
+              <ArrowRight className={`w-5 h-5 transition-transform ${HERO_CONTENT[currentLangIndex].dir === 'rtl' ? 'mr-2 rotate-180 group-hover:-translate-x-1' : 'ml-2 group-hover:translate-x-1'}`} />
+            </Button>
+            <Button variant="outline" size="lg" className="text-lg px-8 bg-white/95 backdrop-blur-md border-2 border-slate-300 hover:border-agricultural-green hover:bg-white shadow-xl w-full sm:w-auto transition-all duration-300 transform hover:-translate-y-0.5">
+              {HERO_CONTENT[currentLangIndex].btnSecondary}
+            </Button>
           </div>
         </motion.div>
       </section>
